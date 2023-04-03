@@ -9,7 +9,7 @@ from telebot.async_telebot import AsyncTeleBot
 async def send_auth(message: types.Message, bot: AsyncTeleBot):
     await bot.reply_to(message, '''
         不保存任何信息，但需要绑定Memos Open API用于推送。\n
-        实现了文字、单张图文和多张图文的功能，日志功能有时间再说了。\n
+        实现了文字、单张图文和多张图文的功能, 支持Markdown语法。\n
         简单使用方法：https://blog.529213.xyz/article/memos-bot
         ''')
 
@@ -43,7 +43,7 @@ def register_auth_handlers(bot: AsyncTeleBot):
     bot.add_custom_filter(TextContainsFilter())
     bot.add_custom_filter(IsReplyFilter())
 
-    bot.register_message_handler(send_auth, commands=['start'], pass_bot=True)
+    bot.register_message_handler(send_auth, commands=['start', 'help'], pass_bot=True)
     bot.register_message_handler(bind, commands=['bind'], pass_bot=True)
     bot.register_message_handler(unbind, commands=['unbind'], pass_bot=True)
     bot.register_message_handler(save_info, is_reply=True, text_contains='api/memo?openId', pass_bot=True)
