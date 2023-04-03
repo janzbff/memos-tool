@@ -14,18 +14,18 @@ async def send_auth(message: types.Message, bot: AsyncTeleBot):
         ''')
 
 async def bind(message: types.Message, bot: AsyncTeleBot):
-    logger.info(f'{message.chat.id}正在申请注册')
+    logger.info(f'{message.chat.id}.db正在申请注册')
     markup = types.ForceReply(selective=False)
     await bot.send_message(message.chat.id, "请输入Memos Open Api.", reply_markup=markup)
 
 async def unbind(message: types.Message, bot: AsyncTeleBot):
-    if (Path(f'db/{message.chat.id}')).exists():
-        Path(f'db/{message.chat.id}').unlink()
-        await bot.reply_to(message, f'{message.chat.id}已经解绑，建议您去Memos后台重置api！')
-        logger.info(f'{message.chat.id}已经解绑了，删除{message.chat.id}配置文件')
+    if (Path(f'db/{message.chat.id}.db')).exists():
+        Path(f'db/{message.chat.id}.db').unlink()
+        await bot.reply_to(message, f'{message.chat.id}.db已经解绑，建议您去Memos后台重置api！')
+        logger.info(f'{message.chat.id}.db已经解绑了，删除{message.chat.id}.db配置文件')
     else:
-        logger.info(f'{message.chat.id}想要解绑，但未找到{message.chat.id}配置文件')
-        await bot.reply_to(message, f'{message.chat.id}未找到您的绑定信息！')
+        logger.info(f'{message.chat.id}.db想要解绑，但未找到{message.chat.id}.db配置文件')
+        await bot.reply_to(message, f'{message.chat.id}.db未找到您的绑定信息！')
 
 async def save_info(message: types.Message, bot: AsyncTeleBot):
     if message.text.startswith("http"):
@@ -34,10 +34,10 @@ async def save_info(message: types.Message, bot: AsyncTeleBot):
         else:
             Path('db').mkdir()
 
-        with shelve.open(f'db/{message.chat.id}', flag='c', protocol=2, writeback=True) as f:
+        with shelve.open(f'db/{message.chat.id}.db', flag='c', protocol=None, writeback=True) as f:
             f['token'] = message.text
-        await bot.reply_to(message, f'{message.chat.id}绑定{message.text}成功！')
-        logger.info(f'{message.chat.id}已经注册')
+        await bot.reply_to(message, f'{message.chat.id}.db绑定{message.text}成功！')
+        logger.info(f'{message.chat.id}.db已经注册')
 
 def register_auth_handlers(bot: AsyncTeleBot):
     bot.add_custom_filter(TextContainsFilter())

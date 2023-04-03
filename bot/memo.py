@@ -13,7 +13,7 @@ from telebot.asyncio_filters import IsReplyFilter
 media_ids = {}
 
 async def send_memo_by_words(message: types.Message, bot: AsyncTeleBot):
-    with shelve.open(f'db/{message.chat.id}', flag='c', protocol=2, writeback=True) as f:
+    with shelve.open(f'db/{message.chat.id}.db', flag='c', protocol=None, writeback=True) as f:
         if f['token']:
             url = f['token']
             o = urlparse(str(url))
@@ -29,22 +29,22 @@ async def send_memo_by_words(message: types.Message, bot: AsyncTeleBot):
                 memo_url = f'{domain}{memo_id}'
                 f[str(message.message_id)] = memo_id
 
-                logger.info(f'{message.chat.id}发送了成功发送了1条Memos, MemoID为{memo_id}')
+                logger.info(f'{message.chat.id}.db发送了成功发送了1条Memos, MemoID为{memo_id}')
 
                 memo_tag = Tag(url)
                 for tag in tags:
                     await memo_tag.create_tag(tag)
-                    logger.info(f'{message.chat.id}发送了成功创建1个TAG, TAG为{tag}')
+                    logger.info(f'{message.chat.id}.db发送了成功创建1个TAG, TAG为{tag}')
                 await bot.reply_to(message, memo_url)
             except Exception as e:
-                logger.error(f'{message.chat.id}创建Memo出错，{e}')
+                logger.error(f'{message.chat.id}.db创建Memo出错，{e}')
                 await bot.reply_to(message, f"出错了，重来吧！{e}")
         else:
-            logger.debug(f'{message.chat.id}没有找到token信息')
-            await bot.reply_to(message, f'{message.chat.id}未找到您的绑定信息！')
+            logger.debug(f'{message.chat.id}.db没有找到token信息')
+            await bot.reply_to(message, f'{message.chat.id}.db未找到您的绑定信息！')
 
 async def send_memo_by_words_and_resource(message: types.Message, bot: AsyncTeleBot):
-    with shelve.open(f'db/{message.chat.id}', flag='c', protocol=2, writeback=True) as f:
+    with shelve.open(f'db/{message.chat.id}.db', flag='c', protocol=None, writeback=True) as f:
         if f['token']:
             url = f['token']
             o = urlparse(str(url))
@@ -62,7 +62,7 @@ async def send_memo_by_words_and_resource(message: types.Message, bot: AsyncTele
 
                 memo_id = await memo.send_memo(text=text, visibility=visibility, res_ids=res_ids)
                 f[str(message.message_id)] = memo_id
-                logger.info(f'{message.chat.id}发送了成功发送了图文Memos, MemoID为{memo_id}')
+                logger.info(f'{message.chat.id}.db发送了成功发送了图文Memos, MemoID为{memo_id}')
 
                 memo_url = f'{domain}{memo_id}'
                 memo_tag = Tag(url)
@@ -71,21 +71,21 @@ async def send_memo_by_words_and_resource(message: types.Message, bot: AsyncTele
 
                 await bot.reply_to(message, memo_url)
             except Exception as e:
-                logger.error(f'{message.chat.id}发送图文失败，{e}')
+                logger.error(f'{message.chat.id}.db发送图文失败，{e}')
                 await bot.reply_to(message, f"出错了，重来吧！{e}")
         else:
             await bot.reply_to(message, "未绑定Memos Open API，请先绑定后再使用。")
             return
 
 async def send_resource(message: types.Message, bot: AsyncTeleBot):
-    with shelve.open(f'db/{message.chat.id}', flag='c', protocol=2, writeback=False) as f:
+    with shelve.open(f'db/{message.chat.id}.db', flag='c', protocol=None, writeback=False) as f:
         if f['token']:
             url = f['token']
         else:
             await bot.reply_to(message, "未绑定Memos Open API，请先绑定后再使用。")
             return
 
-    logger.info(f'{message.chat.id}请求上传资源')
+    logger.info(f'{message.chat.id}.db请求上传资源')
     file_path = await bot.get_file(message.photo[-1].file_id)
     file_url = f'https://api.telegram.org/file/bot{os.getenv("API_TOKEN")}/{file_path.file_path}'
 
@@ -93,7 +93,7 @@ async def send_resource(message: types.Message, bot: AsyncTeleBot):
         res = Resource(url)
         filename = file_path.file_path.split('/')[1]
         res_id = await res.upload_resource_by_stream(file_url, filename=filename)
-        logger.info(f'{message.chat.id}发送了成功上传资源, ResID为{res_id}')
+        logger.info(f'{message.chat.id}.db发送了成功上传资源, ResID为{res_id}')
         if message.media_group_id is not None:
             media_ids.setdefault(message.media_group_id, []).append(res_id)
         else:
@@ -101,11 +101,11 @@ async def send_resource(message: types.Message, bot: AsyncTeleBot):
         # markup = types.ForceReply(selective=False)
         await bot.reply_to(message, f'资源ID：{res_id}')
     except Exception as e:
-        logger.error(f'{message.chat.id}上传资源出错，{e}')
+        logger.error(f'{message.chat.id}.db上传资源出错，{e}')
         await bot.reply_to(message, f"出错了，重来吧！{e}")
 
 async def update_edited_memo(message: types.Message, bot: AsyncTeleBot):
-    with shelve.open(f'db/{message.chat.id}', flag='c', protocol=2, writeback=False) as f:
+    with shelve.open(f'db/{message.chat.id}.db', flag='c', protocol=None, writeback=False) as f:
         if f['token']:
             url = f['token']
             memo_id = f[str(message.message_id)]
@@ -122,10 +122,10 @@ async def update_edited_memo(message: types.Message, bot: AsyncTeleBot):
         memo_tag = Tag(url)
         for tag in tags:
             await memo_tag.create_tag(tag)
-            logger.info(f'{message.chat.id}发送了成功创建1个TAG, TAG为{tag}')
+            logger.info(f'{message.chat.id}.db发送了成功创建1个TAG, TAG为{tag}')
         await bot.reply_to(message, '已经更新了')
     except Exception as e:
-        logger.error(f'{message.chat.id}更新Memo失败，更新ID为{memo_id}，{e}')
+        logger.error(f'{message.chat.id}.db更新Memo失败，更新ID为{memo_id}，{e}')
         await bot.reply_to(message, f"出错了，重来吧！{e}")
 
 

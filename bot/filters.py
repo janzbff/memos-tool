@@ -6,5 +6,5 @@ class ExistDb(SimpleCustomFilter):
     key = 'exist_db'
     @staticmethod
     async def check(message: types.Message):
-       return Path(f'db/{message.chat.id}').exists()
+       return Path(f'db/{message.chat.id}.db').exists()
 
