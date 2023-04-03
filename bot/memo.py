@@ -6,12 +6,16 @@ from loguru import logger
 from telebot.async_telebot import AsyncTeleBot
 from urllib.parse import urlparse
 from memos.memosapi import Memo, Tag, Resource
-from bot.parse import parse_text
+from bot.parse import parse_text, parse_html
 from bot.filters import ExistDb
 
 media_ids = {}
 
 async def send_memo_by_words(message: types.Message, bot: AsyncTeleBot):
+    # print(message.html_text)
+    # text, tags, res_ids, visibility, status = parse_html(message.text, message.html_text, message.entities)
+    # print(f'{text}\n{tags}\n{res_ids}\n{visibility}\n{status}')
+    # return
     with shelve.open(f'../db/{message.chat.id}.db', flag='c', protocol=None, writeback=True) as f:
         if f['token']:
             url = f['token']
@@ -21,9 +25,9 @@ async def send_memo_by_words(message: types.Message, bot: AsyncTeleBot):
             try:
                 memo = Memo(url)
 
-                text, tags, res_ids, visibility, _ = parse_text(message.text)
-                # text, tags, res_ids, visibility, status = parse_html(message.html_text, message.parse_entities())
-                logger.debug(f'\nMemo为: {text}\n Tags为: {tags}\n 公开：{visibility}\n 资源ID：{res_ids}')
+                # text, tags, res_ids, visibility, _ = parse_text(message.text)
+                text, tags, res_ids, visibility, status = parse_html(message.text, message.html_text, message.entities)
+                logger.debug(f'\nMemo为: {text}\n Tags为: {tags}\n 公开：{visibility}\n 资源ID：{res_ids}\n 状态为：{status}')
                 memo_id = await memo.send_memo(text=text, visibility=visibility, res_ids=res_ids)
                 memo_url = f'{domain}{memo_id}'
                 f[str(message.message_id)] = memo_id
@@ -51,7 +55,8 @@ async def send_memo_by_words_and_resource(message: types.Message, bot: AsyncTele
 
             try:
                 memo = Memo(url)
-                text, tags, visibility, _ = parse_text(message.text)
+                # text, tags, visibility, _ = parse_text(message.text)
+                text, tags, _, visibility, _ = parse_html(message.text, message.html_text, message.entities)
                 if message.reply_to_message.media_group_id:
                     res_ids = media_ids[message.reply_to_message.media_group_id]
                 else:

@@ -1,7 +1,10 @@
+import string
+from typing import Literal
 from loguru import logger
+from markdownify import markdownify as md
 
-STATUS = ['NORMAL', 'ARCHIVED']
-VISIBILITY = ['PRIVATE', 'PROTECTED', 'PUBLIC']
+STATUS = Literal['NORMAL', 'ARCHIVED']
+VISIBILITY = Literal['PRIVATE', 'PROTECTED', 'PUBLIC']
 
 def parse_text(text: str):
     """解析信息
@@ -39,39 +42,34 @@ def parse_text(text: str):
     return texts, tags, res_ids, visibility, status
 
 
-# #
-# def parse_html(text: str, entities):
-#     tags = []
-#     visibility: str = 'PRIVATE'
-#     status: str = 'NORMAL'
-#     deleted: list = []
-#     res_ids = []
-#
-#     for entity in entities:
-#         t = text[entity.offset:entity.offset + entity.length]
-#         if entity.type == 'hashtag':
-#             if t.strip('#') in VISIBILITY:
-#                 visibility = t.strip('#')
-#                 deleted.append(t)
-#                 logger.debug(f'发现VISIBILITY为：{t}')
-#             elif t.strip('#') in STATUS:
-#                 status: str = t.strip('#')
-#                 deleted.append(t)
-#                 logger.debug(f'发现STATUS为：{t}')
-#             else:
-#                 logger.debug(f'发现TAG为：{t}')
-#                 tags.append(t.strip('#'))
-#         elif entity.type == 'cashtag':
-#             logger.debug(f'{t}')
-#             res_ids.append(int(t.strip('$')))
-#             deleted.append(t)
-#         else:
-#             pass
-#     if not deleted:
-#         for d in deleted:
-#             text = text.replace(d, '')
-#
-#     return text, tags, res_ids, visibility, status
+def parse_html(text: str, html: str, entities):
+    visibility: VISIBILITY = 'PUBLIC'
+    status: STATUS = 'NORMAL'
+    tags: list | None = []
+    res_ids: list | None = []
+    
+    for entity in entities:
+        t = text[entity.offset:entity.offset + entity.length]
+        match entity.type:
+            case 'hashtag' if t.strip('#') in ['PRIVATE', 'PROTECTED', 'PUBLIC']:
+                logger.debug(f'发现可见性状态:{t}')
+                visibility = t.strip('#')
+                html = html.replace(t, '')
+            case 'hashtag' if t.strip('#') in ['NORMAL', 'ARCHIVED']:
+                logger.debug(f'发现发布状态:{t}')
+                status = t.strip('#')
+                html = html.replace(t, '')
+            case 'hashtag' if t.startswith('#RES'):
+                logger.debug(f'发现资源:{t}')
+                res_ids.append(int(t.strip('#RES')))
+                html = html.replace(t, '')
+            case 'hashtag':
+                logger.debug(f'发现标签:{t}')
+                tags.append(t.strip('#'))
+            case _:
+                pass
+    text = md(html)
+    return text, tags, res_ids, visibility, status
 
 
 
