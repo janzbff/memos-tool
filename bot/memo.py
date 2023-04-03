@@ -13,10 +13,6 @@ from telebot.asyncio_filters import IsReplyFilter
 media_ids = {}
 
 async def send_memo_by_words(message: types.Message, bot: AsyncTeleBot):
-    # print(message.html_text)
-    # text, tags, res_ids, visibility, status = parse_html(message.text, message.html_text, message.entities)
-    # print(f'{text}\n{tags}\n{res_ids}\n{visibility}\n{status}')
-    # return
     with shelve.open(f'../db/{message.chat.id}.db', flag='c', protocol=None, writeback=True) as f:
         if f['token']:
             url = f['token']
@@ -119,7 +115,8 @@ async def update_edited_memo(message: types.Message, bot: AsyncTeleBot):
 
     try:
         memo = Memo(url)
-        text, tags, visibility, res_ids, status = parse_text(message.text)
+        # text, tags, visibility, res_ids, status = parse_text(message.text)
+        text, tags, res_ids, visibility, status = parse_html(message.text, message.html_text, message.entities)
         await memo.update_memo(memo_id, text, visibility, res_ids, status=status)
         logger.debug(f'\nMemo为: {text}\n Tags为: {tags}\n 公开：{visibility}\n 资源ID：{res_ids}\n 状态: {status}\n')
         memo_tag = Tag(url)

@@ -46,28 +46,30 @@ def parse_html(text: str, html: str, entities):
     status: STATUS = 'NORMAL'
     tags: list | None = []
     res_ids: list | None = []
-    
-    for entity in entities:
-        t = text[entity.offset:entity.offset + entity.length]
-        match entity.type:
-            case 'hashtag' if t.strip('#') in ['PRIVATE', 'PROTECTED', 'PUBLIC']:
-                logger.debug(f'发现可见性状态:{t}')
-                visibility = t.strip('#')
-                html = html.replace(t, '')
-            case 'hashtag' if t.strip('#') in ['NORMAL', 'ARCHIVED']:
-                logger.debug(f'发现发布状态:{t}')
-                status = t.strip('#')
-                html = html.replace(t, '')
-            case 'hashtag' if t.startswith('#RES'):
-                logger.debug(f'发现资源:{t}')
-                res_ids.append(int(t.strip('#RES')))
-                html = html.replace(t, '')
-            case 'hashtag':
-                logger.debug(f'发现标签:{t}')
-                tags.append(t.strip('#'))
-            case _:
-                pass
-    text = md(html)
+    if entities is None:
+        text = md(html=html)
+    else:
+        for entity in entities:
+            t = text[entity.offset:entity.offset + entity.length]
+            match entity.type:
+                case 'hashtag' if t.strip('#') in ['PRIVATE', 'PROTECTED', 'PUBLIC']:
+                    logger.debug(f'发现可见性状态:{t}')
+                    visibility = t.strip('#')
+                    html = html.replace(t, '')
+                case 'hashtag' if t.strip('#') in ['NORMAL', 'ARCHIVED']:
+                    logger.debug(f'发现发布状态:{t}')
+                    status = t.strip('#')
+                    html = html.replace(t, '')
+                case 'hashtag' if t.startswith('#RES'):
+                    logger.debug(f'发现资源:{t}')
+                    res_ids.append(int(t.strip('#RES')))
+                    html = html.replace(t, '')
+                case 'hashtag':
+                    logger.debug(f'发现标签:{t}')
+                    tags.append(t.strip('#'))
+                case _:
+                    pass
+        text = md(html)
     return text, tags, res_ids, visibility, status
 
 
