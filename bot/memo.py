@@ -13,7 +13,7 @@ from telebot.asyncio_filters import IsReplyFilter
 media_ids = {}
 
 async def send_memo_by_words(message: types.Message, bot: AsyncTeleBot):
-    with shelve.open(f'../db/{message.chat.id}.db', flag='c', protocol=None, writeback=True) as f:
+    with shelve.open(f'db/{message.chat.id}.db', flag='c', protocol=None, writeback=True) as f:
         if f['token']:
             url = f['token']
             o = urlparse(str(url))
@@ -44,7 +44,7 @@ async def send_memo_by_words(message: types.Message, bot: AsyncTeleBot):
             await bot.reply_to(message, f'{message.chat.id}未找到您的绑定信息！')
 
 async def send_memo_by_words_and_resource(message: types.Message, bot: AsyncTeleBot):
-    with shelve.open(f'../db/{message.chat.id}.db', flag='c', protocol=None, writeback=True) as f:
+    with shelve.open(f'db/{message.chat.id}.db', flag='c', protocol=None, writeback=True) as f:
         if f['token']:
             url = f['token']
             o = urlparse(str(url))
@@ -78,7 +78,7 @@ async def send_memo_by_words_and_resource(message: types.Message, bot: AsyncTele
             return
 
 async def send_resource(message: types.Message, bot: AsyncTeleBot):
-    with shelve.open(f'../db/{message.chat.id}.db', flag='c', protocol=None, writeback=False) as f:
+    with shelve.open(f'db/{message.chat.id}.db', flag='c', protocol=None, writeback=False) as f:
         if f['token']:
             url = f['token']
         else:
@@ -105,7 +105,7 @@ async def send_resource(message: types.Message, bot: AsyncTeleBot):
         await bot.reply_to(message, f"出错了，重来吧！{e}")
 
 async def update_edited_memo(message: types.Message, bot: AsyncTeleBot):
-    with shelve.open(f'../db/{message.chat.id}.db', flag='c', protocol=None, writeback=False) as f:
+    with shelve.open(f'db/{message.chat.id}.db', flag='c', protocol=None, writeback=False) as f:
         if f['token']:
             url = f['token']
             memo_id = f[str(message.message_id)]

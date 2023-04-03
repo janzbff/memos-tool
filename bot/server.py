@@ -10,7 +10,7 @@ from bot.auth import register_auth_handlers
 from bot.memo import register_memo_handlers
 
 
-load_dotenv(Path('../.env'))
+load_dotenv(Path('.env'))
 bot = AsyncTeleBot(os.getenv('API_TOKEN'))
 
 register_auth_handlers(bot)
