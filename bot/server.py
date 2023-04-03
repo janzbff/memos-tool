@@ -46,7 +46,7 @@ async def setup():
     app.on_cleanup.append(shutdown)
     return app
 
-async def main():
+def main():
     mode = os.getenv('MODE', default='polling')
     if mode == 'webhook':
         logger.debug(f'webhook模式')
@@ -57,12 +57,13 @@ async def main():
             port=os.getenv('WEBHOOK_PORT')
         )
     elif mode == 'polling':
-        await bot.remove_webhook()
+        asyncio.run(bot.remove_webhook())
         logger.debug(f'polling模式')
-        await bot.infinity_polling()
+        asyncio.run(bot.infinity_polling())
     else:
         pass
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()
+

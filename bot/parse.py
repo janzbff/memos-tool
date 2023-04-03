@@ -1,4 +1,3 @@
-import string
 from typing import Literal
 from loguru import logger
 from markdownify import markdownify as md
@@ -43,7 +42,7 @@ def parse_text(text: str):
 
 
 def parse_html(text: str, html: str, entities):
-    visibility: VISIBILITY = 'PUBLIC'
+    visibility: VISIBILITY = 'PRIVATE'
     status: STATUS = 'NORMAL'
     tags: list | None = []
     res_ids: list | None = []

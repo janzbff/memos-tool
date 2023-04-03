@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 from memos.memosapi import Memo, Tag, Resource
 from bot.parse import parse_text, parse_html
 from bot.filters import ExistDb
+from telebot.asyncio_filters import IsReplyFilter
 
 media_ids = {}
 
@@ -133,8 +134,9 @@ async def update_edited_memo(message: types.Message, bot: AsyncTeleBot):
 
 def register_memo_handlers(bot: AsyncTeleBot):
     bot.add_custom_filter(ExistDb())
+    bot.add_custom_filter(IsReplyFilter())
 
-    bot.register_message_handler(send_resource, content_types=['photo'], pass_bot=True)
-    bot.register_message_handler(send_memo_by_words_and_resource, content_types=['photo'], exist_db=True, pass_bot=True)
-    bot.register_message_handler(send_memo_by_words, content_types=['text'], exist_db=True, pass_bot=True)
+    bot.register_message_handler(send_resource, content_types=['photo'],  pass_bot=True)
+    bot.register_message_handler(send_memo_by_words_and_resource, content_types=['text', 'photo'], is_reply=True, exist_db=True, pass_bot=True)
+    bot.register_message_handler(send_memo_by_words, content_types=['text'], exist_db=True, is_reply=False, pass_bot=True)
     bot.register_edited_message_handler(update_edited_memo, content_types=['text'], exist_db=True, pass_bot=True)
