@@ -1,4 +1,5 @@
 import shelve
+import dbm.gnu
 from pathlib import Path
 from telebot import types
 from loguru import logger
@@ -34,7 +35,7 @@ async def save_info(message: types.Message, bot: AsyncTeleBot):
         else:
             Path('db').mkdir()
 
-        with shelve.open(f'db/{message.chat.id}.db', flag='c', protocol=None, writeback=True) as f:
+        with shelve.Shelf(dbm.gnu.open(f'db/{message.chat.id}.db', 'c'), protocol=None, writeback=True) as f:
             f['token'] = message.text
         await bot.reply_to(message, f'{message.chat.id}.db绑定{message.text}成功！')
         logger.info(f'{message.chat.id}.db已经注册')
